@@ -11,13 +11,13 @@ names = ["edge_simpl", "hue_simpl", "average_lum",
 df = pd.read_csv("dados/db1_scores.csv")
 df = df.sort_values(by=["MOS_zscore"])
 imagesData = df.iloc[np.arange(0, 11000, 1000)]
-bestImages = df.iloc[9000:]
-print("bestImages:", len(bestImages))
-data = df[["image_name", "MOS_zscore"]]
+images = df.iloc[1915:]
+
+data = images[["image_name", "MOS_zscore"]]
 targetHour = 17
 targetMin = 55
 n = 0
-with open("dataBest.csv", "w") as fp:
+with open("dataquinta.csv", "w") as fp:
     wr = csv.writer(fp, dialect='excel')
     wr.writerow(names)
     for index, row in data.iterrows():
