@@ -12,6 +12,5 @@ RUN pip3 install -r requirements.txt
 
 USER 1000
 
-COPY ./notebooks ./notebooks
-COPY ./sample_data/1024x768/ ./sample_data/1024x768/
-ENTRYPOINT ["jupyter","notebook"]
+COPY ./src ./src
+COPY ./extracao ./extracao
