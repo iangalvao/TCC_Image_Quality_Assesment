@@ -1,0 +1,12 @@
+# TCC Ian Galvão / IQA
+
+name: image_quality_assesment
+
+docker_env:
+  image: iqa_mac0499
+
+entry_points:
+  main:
+    parameters:
+      l1_ratio: { type: float, default: 0.1 }
+    command: "python src/train.py {l1_ratio}"
