@@ -36,7 +36,7 @@ if __name__ == "__main__":
     y_train = np.array(y_train).flatten().astype(int)
     y_test = np.array(y_test).flatten().astype(int)
 
-    l1_ratio = float(sys.argv[1]) if len(sys.argv) > 2 else 0.5
+    l1_ratio = float(sys.argv[1]) if len(sys.argv) > 1 else 0.5
 
     with mlflow.start_run():
         lr = LogisticRegression(random_state=0, max_iter=4000)
