@@ -12,10 +12,8 @@ RUN pip3 install -r requirements.txt
 
 USER 1000
 
-ENV MLFLOW_TRACKING_URI=http://localhost:5000
-ENV MLFLOW_S3_ENDPOINT_URL=http://localhost:9000
 
-COPY ./aws/credentials ~/.aws/credentials
+
 
 COPY ./src ./src
 COPY ./extracao ./extracao

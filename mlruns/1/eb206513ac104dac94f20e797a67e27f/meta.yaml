@@ -1,0 +1,15 @@
+artifact_uri: file:///home/ian/Documents/ian/TCC/TCC_Features_Extraction/mlruns/1/eb206513ac104dac94f20e797a67e27f/artifacts
+end_time: 1661791784905
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: eb206513ac104dac94f20e797a67e27f
+run_uuid: eb206513ac104dac94f20e797a67e27f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1661791632581
+status: 3
+tags: []
+user_id: ian
