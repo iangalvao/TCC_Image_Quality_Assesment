@@ -3,14 +3,13 @@
 # Modeling wine preferences by data mining from physicochemical properties. In Decision Support Systems, Elsevier, 47(4):547-553, 2009.
 
 import sys
-from sklearn.datasets import load_iris
+import mlflow
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
-import mlflow
+
 import mlflow.sklearn
 
 
