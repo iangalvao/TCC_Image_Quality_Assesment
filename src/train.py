@@ -2,6 +2,7 @@
 # P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis.
 # Modeling wine preferences by data mining from physicochemical properties. In Decision Support Systems, Elsevier, 47(4):547-553, 2009.
 
+import os
 import sys
 import mlflow
 from sklearn.model_selection import train_test_split
@@ -25,8 +26,8 @@ if __name__ == "__main__":
 
     # Read the images's hand-crafted features from csv
 
-    df = pd.read_csv("../extracao/data.csv")
-
+    df = pd.read_csv(os.path.abspath("extracao/data.csv"))
+    print("data open")
     # Split the data into training and test sets. (0.75, 0.25) split.
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1:]
