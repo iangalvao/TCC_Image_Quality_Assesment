@@ -1,0 +1,16 @@
+Models:
+  - "LinearRegression"
+  #- "LogisticRegression"
+  - "RandomForestRegressor"
+  - "DecisionTreeRegressor"
+
+Features:
+  - "edge_simpl"
+  - "hue_simpl"
+  - "average_lum"
+  - "contrast_ratio"
+  - "hist_width"
+  - "blur"
+
+Target:
+  - "score"

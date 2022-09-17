@@ -8,5 +8,5 @@ docker_env:
 entry_points:
   main:
     parameters:
-      l1_ratio: { type: float, default: 0.1 }
-    command: "python src/train.py {l1_ratio}"
+      max_iter: { type: int, default: 100 }
+    command: "python src/train.py {max_iter}"

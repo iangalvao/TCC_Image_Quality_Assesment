@@ -1,3 +1,5 @@
 /dados/
 /.vscode/
 /notebooks/.ipynb_checkpoints/
+/mlruns/
+/tmpcode/

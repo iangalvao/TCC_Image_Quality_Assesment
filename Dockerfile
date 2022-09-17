@@ -13,7 +13,7 @@ RUN pip3 install -r requirements.txt
 USER 1000
 
 
-
+COPY ./.aws/credentials ~/.aws/credentials
 
 COPY ./src ./src
 COPY ./extracao ./extracao
