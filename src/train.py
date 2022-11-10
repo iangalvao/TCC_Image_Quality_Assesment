@@ -4,25 +4,30 @@
 
 import os
 import sys
-import mlflow
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_validate
+from tabnanny import verbose
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.inspection import permutation_importance
-from sklearn.model_selection import GridSearchCV
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import yaml
-import mlflow.sklearn
-from sklearn.utils import shuffle
 from itertools import chain, combinations
 import datetime
 import tempfile
+
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_validate
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
+from sklearn.utils import shuffle
+
+import mlflow
+import mlflow.sklearn
+from mlflow.tracking import MlflowClient
+from mlflow.utils.mlflow_tags import MLFLOW_PARENT_RUN_ID
+
 
 sklearn_models = {
     "LogisticRegression": LogisticRegression,
@@ -101,7 +106,38 @@ def metrics_from_predict(model, X, y):
     return rmse, mae, r2
 
 
-def log_run(gridsearch: GridSearchCV, model_name: str, run_index: int, tags={}):
+def load_grid_params(config, model_name):
+    grid_params = config[model_name]["GridSearch"]
+    param_grid = {}
+    if "Range" in grid_params.keys():
+        range_params = grid_params["Range"]
+        for k, v in range_params.items():
+            param_grid[k] = range(v[0], v[1], v[2])
+    if "List" in grid_params.keys():
+        list_params = grid_params["List"]
+        for k, v in list_params.items():
+            param_grid[k] = v
+
+    return param_grid
+
+
+def create_child_run(parent_run_id, experiment_id):
+    child_run_1 = client.create_run(
+        experiment_id=experiment_id, tags={MLFLOW_PARENT_RUN_ID: parent_run_id}
+    )
+
+    client.log_param(child_run_1.info.run_id, "who", "child")
+    return child_run_1
+
+
+def log_run(
+    gridsearch: GridSearchCV,
+    model_name: str,
+    run_index: int,
+    tags,
+    experiment_id,
+    run_id,
+):
     """Logging of cross validation results to mlflow tracking server
 
     Args:
@@ -112,41 +148,39 @@ def log_run(gridsearch: GridSearchCV, model_name: str, run_index: int, tags={}):
     """
 
     cv_results = gridsearch.cv_results_
+    print("run/experimendt id:", run_id, experiment_id)
+    child_run = create_child_run(run_id, experiment_id)
+    print("CREATE RUN OK")
+    child_id = child_run.info.run_id
+    client.log_param(child_id, "folds", gridsearch.cv)
 
-    with mlflow.start_run(run_name=str(run_index)) as run:
+    print("Logging parameters")
+    params = list(gridsearch.param_grid.keys())
+    for param in params:
+        client.log_param(child_id, param, cv_results["param_%s" % param][run_index])
 
-        mlflow.log_param("folds", gridsearch.cv)
-
-        print("Logging parameters")
-        params = list(gridsearch.param_grid.keys())
-        for param in params:
-            mlflow.log_param(param, cv_results["param_%s" % param][run_index])
-
-        print("Logging metrics")
-        for score_name in [score for score in cv_results if "mean_test" in score]:
-            mlflow.log_metric(score_name, cv_results[score_name][run_index])
-            mlflow.log_metric(
-                score_name.replace("mean", "std"),
-                cv_results[score_name.replace("mean", "std")][run_index],
+    print("Logging metrics. Printing CV results")
+    # print(cv_results)
+    for score_name in [score for score in cv_results if "mean_test" in score]:
+        if ("absolute" in score_name) or ("squared" in score_name):
+            client.log_metric(
+                child_id, score_name, (-1) * cv_results[score_name][run_index]
             )
+        else:
+            client.log_metric(child_id, score_name, cv_results[score_name][run_index])
+        client.log_metric(
+            child_id,
+            score_name.replace("mean", "std"),
+            cv_results[score_name.replace("mean", "std", 1)][run_index],
+        )
 
-        print("Logging CV results matrix")
-        tempdir = tempfile.TemporaryDirectory().name
-        os.mkdir(tempdir)
-        timestamp = datetime.now().isoformat().split(".")[0].replace(":", ".")
-        filename = "%s-%s-cv_results.csv" % (model_name, timestamp)
-        csv = os.path.join(tempdir, filename)
-        pd.DataFrame(cv_results).to_csv(csv, index=False)
+    print("Logging extra data related to the experiment")
+    # client.set_tag(child_id, tags)
 
-        mlflow.log_artifact(csv, "cv_results")
+    run_id = child_run.info.run_uuid
+    client.set_terminated(run_id)
 
-        print("Logging extra data related to the experiment")
-        mlflow.set_tags(tags)
-
-        run_id = run.info.run_uuid
-        mlflow.end_run()
-
-        print("runID: %s" % run_id)
+    print("runID: %s" % run_id)
 
 
 if __name__ == "__main__":
@@ -181,23 +215,46 @@ if __name__ == "__main__":
 
     models = config["Models"]
     max_iter = int(sys.argv[1]) if len(sys.argv) > 1 else 100
-    mlflow.set_experiment("CV tests")
+    experiment_name = "GridSearchCV"
+
+    client = MlflowClient(tracking_uri="http://localhost:5000")
+    try:
+        experiment_id = client.create_experiment(experiment_name)
+    except:
+        experiment_id = client.get_experiment_by_name(experiment_name).experiment_id
+    experiment = mlflow.set_experiment(experiment_name)
     print("starting training")
     for model in models:
+        param_grid = load_grid_params(config, model)
         skmodel = sklearn_models[model]()
-        for feature_set in powerset(features, 5, 6):
+        for feature_set in powerset(features, 6, 6):
             feature_set = list(feature_set)
-            X_train_fs = X[feature_set]
+            X_train_fs = X_train[feature_set]
             X_test_fs = X_test[feature_set]
-            runN = 1
-            with mlflow.start_run(run_name=f"{model}_{len(feature_set)}_feats_CV"):
-                print("Model:", model)
 
-                gsCV = GridSearchCV(skmodel, params)
-                training(gsCV)
-                rmse, mae, r2 = eval_metrics_cv(gsCV.cv_results_)
+            tags = {"features": feature_set, "target": target}
+            with mlflow.start_run(
+                run_name=f"{model}_{len(feature_set)}_feats_CV"
+            ) as run:
+                print("Model:", model)
+                _scoring = {
+                    "r2",
+                    "neg_mean_absolute_error",
+                    "neg_root_mean_squared_error",
+                }
+                gsCV = GridSearchCV(
+                    skmodel, param_grid, scoring=_scoring, refit="r2", verbose=2
+                )
+                training(gsCV, X_train_fs, y_train)
+                # rmse, mae, r2 = eval_metrics_cv(gsCV.cv_results_)
+                run_id = run.info.run_id
+
                 for i in range(len(gsCV.cv_results_["params"])):
-                    log_run(gsCV, model, i, tags)
+                    log_run(gsCV, model, i, tags, experiment_id, run_id)
+                print("SCORE:")
+                print(gsCV.score(X_test_fs, y_test))
+                predicted_qualities = gsCV.predict(X_test_fs)
+                (rmse, mae, r2) = eval_metrics(y_test, predicted_qualities)
 
                 # skmodel.fit(X_train_fs, y_train)
                 # print("Training Complete. Predicting")
@@ -213,10 +270,31 @@ if __name__ == "__main__":
                 print("  MAE: %s" % mae)
                 print("  R2: %s" % r2)
                 params = {"model": model, "n_features": len(feature_set)}
-                tags = {"features": feature_set, "target": target}
-                metrics = {"r2": r2, "rmse": rmse, "mae": mae}
+
+                metrics = {
+                    "mean_test_r2": r2,
+                    "mean_test_neg_root_mean_squared_error": rmse,
+                    "mean_test_neg_mean_absolute_error": mae,
+                }
 
                 mlflow_log(params=params, tags=tags, metrics=metrics, model=None)
+                for k, v in tags.items():
+                    mlflow.set_tag(k, v)
+
+                print("Logging CV results matrix")
+                tempdir = tempfile.TemporaryDirectory().name
+                os.mkdir(tempdir)
+                timestamp = (
+                    datetime.datetime.now().isoformat().split(".")[0].replace(":", ".")
+                )
+                cv_results = gsCV.cv_results_
+
+                filename = "%s-%s-cv_results.csv" % (model, timestamp)
+                csv = os.path.join(tempdir, filename)
+                pd.DataFrame(cv_results).to_csv(csv, index=False)
+
+                mlflow.log_artifact(csv, "cv_results")
+
                 # mlflow.log_param("model", model)
                 # mlflow.log_param("n_features", len(feature_set))
                 # mlflow.set_tag("features", feature_set)
@@ -227,5 +305,5 @@ if __name__ == "__main__":
                 # mlflow.log_metric("mae", mae)
 
                 # mlflow.sklearn.log_model(skmodel, f"{model}_{len(features)}_{runN}")
-                runN += 1
+
             mlflow.end_run()

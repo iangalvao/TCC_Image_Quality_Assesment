@@ -1,7 +1,7 @@
 Models:
-  - "LinearRegression"
-  #- "LogisticRegression"
-  - "RandomForestRegressor"
+  # - "LinearRegression"
+  # - "LogisticRegression"
+  # - "RandomForestRegressor"
   - "DecisionTreeRegressor"
 
 Features:
@@ -14,3 +14,62 @@ Features:
 
 Target:
   - "score"
+
+LinearRegression:
+  GridSearch:
+    List:
+      fit_intercept:
+        - True
+        - False
+
+RandomForestRegressor:
+  GridSearch:
+    Range:
+      n_estimators:
+        - 100
+        - 500
+        - 100
+      max_features:
+        - 2
+        - 6
+        - 1
+
+      max_depth:
+        - 5
+        - 10
+        - 1
+
+      min_samples_split:
+        - 10
+        - 30
+        - 10
+      min_samples_leaf:
+        - 2
+        - 6
+        - 2
+    List:
+      bootstrap:
+        - True
+        - False
+
+DecisionTreeRegressor:
+  GridSearch:
+    Range:
+      max_features:
+        - 2
+        - 6
+        - 1
+
+      max_depth:
+        - 5
+        - 31
+        - 5
+
+      min_samples_split:
+        - 10
+        - 31
+        - 5
+      min_samples_leaf:
+        - 2
+        - 7
+        - 2
