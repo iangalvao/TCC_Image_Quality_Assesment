@@ -7,12 +7,39 @@ from skimage.color import rgb2lab, lab2rgb
 import scipy.ndimage.filters
 
 
+def hist_width(v, p):
+    threshold = (1 - p) / 2
+    leftsum = 0
+    rightsum = 0
+    l = len(v)
+    end = l - 1
+    start = 0
+    left = 1
+    right = 1
+    for i in range(l):
+        leftsum += v[i]
+        rightsum += v[l - 1 - i]
+        if (leftsum >= threshold) and left:
+            start = i
+            left = 0
+        if (rightsum >= threshold) and right:
+            end = l - 1 - i
+            right = 0
+        if (not left) and (not right):
+            break
+    if start > end:
+        result = 0
+    else:
+        result = (end - start) / l
+    return result
+
+
 def min_range(v, p):
     w = len(v)
     sumByPos = np.zeros(w)
     resRange = []
     for i in range(w):
-        resRange.append(w+1)
+        resRange.append(w + 1)
         for j in range(i, w):
             sumByPos[i] += v[j]
             if sumByPos[i] > p:
@@ -29,9 +56,9 @@ def hue_simplicity(imArray):
     sat = hsvimage[:, :, 1]
     value = hsvimage[:, :, 2]
 
-    normV = value/255
+    normV = value / 255
     saturated = [(p > 0.2) for p in sat.flatten()]
-    middleValues = [((p > 0.15) and (p < .95)) for p in normV.flatten()]
+    middleValues = [((p > 0.15) and (p < 0.95)) for p in normV.flatten()]
     filteredHues = hue.flatten()[saturated and middleValues]
 
     hist = np.histogram(filteredHues, bins=20)
@@ -72,9 +99,9 @@ def luminanceContrast(imArray):
 
     sumHist = histR[0] + histG[0] + histB[0]
 
-    histWidth = min_range(sumHist/sumHist.sum(), .98)
+    histWidth = hist_width(sumHist / sumHist.sum(), 0.98)
 
-    f = histWidth/256
+    f = histWidth / 256
     return (averageL, ratio, f)
 
 
@@ -82,12 +109,12 @@ def edge_simplicity(imArray):
     laplacian = scipy.ndimage.filters.laplace(imArray[:, :, 0])
 
     totalSum = laplacian.sum()
-    sumRows = laplacian.sum(axis=1)/totalSum
-    sumColumns = laplacian.sum(axis=0)/totalSum
+    sumRows = laplacian.sum(axis=1) / totalSum
+    sumColumns = laplacian.sum(axis=0) / totalSum
 
-    f1 = min_range(sumColumns, .95)/len(sumRows)
-    f2 = min_range(sumRows, .95)/len(sumColumns)
-    return (f1+f2)/2
+    f1 = hist_width(sumColumns, 0.95) / len(sumRows)
+    f2 = hist_width(sumRows, 0.95) / len(sumColumns)
+    return (f1 + f2) / 2
 
 
 def blur(imArray):
@@ -95,7 +122,7 @@ def blur(imArray):
     alpha = 5
     filtro = [(a > alpha) for a in fft]
     C = fft[filtro]
-    feat = len(C)/len(fft)
+    feat = len(C) / len(fft)
     return feat
 
 
