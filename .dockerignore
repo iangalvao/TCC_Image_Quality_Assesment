@@ -1,2 +1,5 @@
 dados/
 .git/
+/.vscode/
+/mlruns/
+/tmpcode/
