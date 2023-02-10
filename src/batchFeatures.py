@@ -28,13 +28,13 @@ with open("dataExp.csv", "w") as fp:
     for index, row in data.iterrows():
         print(n)
         name = row["image_name"]
-        # score = row["MOS_zscore"]
+        score = row["MOS_zscore"]
         path = "dados/1024x768/" + name
         im = Image.open(path)
         imArray = np.array(im)
         out = [name]
         out.extend(extractFeatures(imArray))
-        # out.append(score)
+        out.append(score)
         wr.writerow(out)
         im.close()
         n += 1

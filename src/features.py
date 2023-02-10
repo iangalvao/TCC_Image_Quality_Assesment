@@ -105,7 +105,6 @@ def luminanceContrast(imArray):
     return (averageL, ratio, f)
 
 
-""" 
 def edge_simplicity(imArray):
     laplacian = scipy.ndimage.filters.laplace(imArray[:, :, 0])
 
@@ -115,21 +114,6 @@ def edge_simplicity(imArray):
 
     f1 = hist_width(sumColumns, 0.95) / len(sumRows)
     f2 = hist_width(sumRows, 0.95) / len(sumColumns)
-    return (f1 + f2) / 2
- """
-
-
-def edge_simplicity(imArray):
-    blur = scipy.ndimage.gaussian_filter(imArray, 2)
-    laplacian = scipy.ndimage.laplace(blur)
-
-    totalSum = laplacian.sum()
-    sumRows = laplacian.sum(axis=1) / totalSum
-    sumRows = sumRows.sum(axis=1)
-    sumColumns = laplacian.sum(axis=0) / totalSum
-    sumColumns = sumColumns.sum(axis=1)
-    f1 = hist_width(sumColumns, 0.98) / len(sumRows)
-    f2 = hist_width(sumRows, 0.98) / len(sumColumns)
     return (f1 + f2) / 2
 
 
@@ -144,7 +128,7 @@ def blur(imArray):
 
 def extractFeatures(imArray):
     e = edge_simplicity(imArray)
-    # h = hue_simplicity(imArray)
-    # al, r, hw = luminanceContrast(imArray)
-    # b = blur(imArray)
-    return [e]  # , h, al, r, hw, b]
+    h = hue_simplicity(imArray)
+    al, r, hw = luminanceContrast(imArray)
+    b = blur(imArray)
+    return [e, h, al, r, hw, b]
