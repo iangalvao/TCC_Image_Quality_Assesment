@@ -4,7 +4,7 @@ Projeto de extração de features e treinamento de Projeto de Formatura Supervis
 ## Descrição
 
 Este software realiza a extração de características estéticas de imagens retirada dos banco KonIQ-10k e treina 6 famílias de modelos com os resultados.
-## Getting Started
+## Instalação
 
 ### Dependências
 
@@ -33,3 +33,15 @@ make run
 ```
 
 Parte dos notebooks utiliza o MLFLOW para armazenamento. Siga as instruções de https://github.com/Fernando-Freire/MLFlow_docker_compose_template.
+
+Após o uso rode:
+
+make clean
+
+## Dados
+
+Este repositório utiliza apenas uma amostra das imagens rotuladas do banco KonIQ-10k. O banco completo pode ser baixado em http://database.mmsp-kn.de/koniq-10k-database.html. Esse projeto utilizou como base as imagens em alta resolução disponíveis no link.
+
+## Monografia
+
+A monografia e o site do projeto podem ser acessados em https://iangalvao.github.io/.
