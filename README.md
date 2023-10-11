@@ -1,42 +1,34 @@
 # Avaliação Estética de Imagens com Aprendizado de Máquina
-Projeto de extração de features e treinamento de Projeto de Formatura Supervisionado (MAC0499)
+
 
 ## Descrição
+Este repositório foi desenvolvido para o Projeto de Formatura Supervisionado do curso de Bacharelado em Ciência da Computação no IME- USP.
+O software realiza a avaliação de qualidade de imagens com aprendizado de máquina supervisionado. A partir de imagens rotuladas com avaliações de qualidade feita por crowdsourcing, foram extraídas características estéticas das imagens, resultando em um vetor com 6 características para cada imagem. Esses vetores foram utilizados para treinar 5 modelos de regressão com o objetivo de predizer as avaliações de qualidade dos usuários do crowdsourcing. Os resultados de todos os modelos foram analisados e comparados.  
 
-Este software realiza a extração de características estéticas de imagens retirada dos banco KonIQ-10k e treina 6 famílias de modelos com os resultados.
+Como método alternativo, foi realizado um processo de extração de características automatizado com o modelo de rede neural pré-treinado VGG16, e em seguida treinado um modelo para comparação com os demais. O desempenho desse último modelo superou os outros 5.
+
 ## Instalação
 
 ### Dependências
 
 - docker
-- poetry 1.1.14
 - sistema operacional ubuntu
-- python 10.5 (importante usar essa versão)
-### Installing
-
-- Instalação do Docker: https://docs.docker.com/engine/install/ubuntu/
-
-- Instale o poetry 
-
 
 ### Subindo o Container e Inicializando o Jupyter
 
-rode (O COMANDO ABAIXO IRA BAIXAR AS IMAGENS DO DOCKER E PACOTES!)
-
+rode:
+ATENÇÃO: o comando abaixo irá baixar a imagem do docker e os pacotes necessários.
 
 ```
-make build
+$ make build
 ```
 e então:
 ```
-make run
+$ make run
 ```
 
-Parte dos notebooks utiliza o MLFLOW para armazenamento. Siga as instruções de https://github.com/Fernando-Freire/MLFlow_docker_compose_template.
+Parte dos notebooks utiliza o MLFLOW para armazenamento. Siga as instruções de https://github.com/Fernando-Freire/MLFlow_docker_compose_template para inicializar o serviço.
 
-Após o uso rode:
-
-make clean
 
 ## Dados
 
