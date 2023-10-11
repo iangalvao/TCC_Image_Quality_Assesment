@@ -3,3 +3,7 @@
 /notebooks/.ipynb_checkpoints/
 /mlruns/
 /tmpcode/
+/.env
+/__pycache__/
+/.aws
+/.ipynb_checkpoints
