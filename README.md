@@ -36,4 +36,4 @@ Este repositório utiliza apenas uma amostra das imagens rotuladas do banco KonI
 
 ## Monografia
 
-A monografia e o site do projeto podem ser acessados em https://iangalvao.github.io/.
+A monografia pode ser acessada no site do projeto: https://iangalvao.github.io/.
