@@ -1,8 +1,8 @@
-FROM jupyter/scipy-notebook
-
+#FROM jupyter/scipy-notebook
+FROM jupyter/base-notebook:python-3.10.5
 RUN pip3 install --upgrade pip wheel setuptools
 
-RUN pip3 install poetry
+RUN pip3 install poetry==1.1.14
 RUN poetry --version
 COPY pyproject.toml poetry.lock ./
 

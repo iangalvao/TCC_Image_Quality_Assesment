@@ -3,3 +3,6 @@ dados/
 /.vscode/
 /mlruns/
 /tmpcode/
+/.env
+/__pycache__/
+
